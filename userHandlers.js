@@ -36,6 +36,50 @@ const getUserById = (req, res) => {
     });
 };
 
+const getUserByLanguage = (req, res) => {
+  let sql = "select * from users";
+  const sqlValues = [];
+
+  if (req.query.language != null) {
+    sql += " where language = English";
+    sqlValues.push(req.query.language);
+  } else {
+    res.status(200).send("Ok");
+  }
+
+  database
+    .query(sql, sqlValues)
+    .then(([users]) => {
+      res.json(users);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error retrieving data from database");
+    });
+};
+
+const getUserByCity = (req, res) => {
+  let sql = "select * from users";
+  const sqlValues = [];
+
+  if (req.query.city != null) {
+    sql += " where city = Paris";
+    sqlValues.push(req.query.city);
+  } else {
+    res.status(200).send("Ok");
+  }
+
+  database
+    .query(sql, sqlValues)
+    .then(([users]) => {
+      res.json(users);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error retrieving data from database");
+    });
+};
+
 const postUser = (req, res) => {
   const { firstname, lastname, email, city } = req.body;
 
@@ -75,9 +119,30 @@ const updateUser = (req, res) => {
     });
 };
 
+const deleteUser = (req, res) => {
+  const id = parseInt(req.params.id);
+
+  database
+    .query("delete from user where id = ?", [id])
+    .then(([result]) => {
+      if (result.affectedRows === 0) {
+        res.status(404).send("Not Found");
+      } else {
+        res.sendStatus(204);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error deleting the ");
+    });
+};
+
 module.exports = {
   getUsers,
   getUserById,
   postUser,
   updateUser,
+  deleteUser,
+  getUserByLanguage,
+  getUserByCity,
 };
