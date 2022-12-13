@@ -79,8 +79,16 @@ const getUserByCity = (req, res) => {
       res.status(500).send("Error retrieving data from database");
     });
 };
+const argon2 = require("argon2");
 
-const postUser = (req, res) => {
+const hashingOptions = {
+  type: argon2.argon2id,
+  memoryCost: 2 ** 16,
+  timeCost: 5,
+  parallelism: 1,
+};
+
+const postUser = (req, res, next) => {
   const { firstname, lastname, email, city } = req.body;
 
   database
@@ -94,6 +102,19 @@ const postUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       res.status(500).send("Error saving the user");
+    })
+    .hash(req.body.password, hashingOptions)
+    .then((hashedPassword) => {
+      console.log(hashedPassword);
+
+      req.body.hashedPassword = hashedPassword;
+      delete req.body.password;
+
+      next();
+    })
+    .catch((err) => {
+      console.error(err);
+      res.sendStatus(500);
     });
 };
 
@@ -145,4 +166,5 @@ module.exports = {
   deleteUser,
   getUserByLanguage,
   getUserByCity,
+  hashPassword,
 };

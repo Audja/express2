@@ -25,6 +25,10 @@ app.listen(port, (err) => {
   }
 });
 
+const { hashPassword } = require("./auth.js");
+
+app.post("/api/users", hashPassword, userHandlers.postUser);
+
 app.get("/", welcome);
 app.get("/api/movies", movieHandlers.getMovies);
 app.get("/api/movies/:id", movieHandlers.getMovieById);
